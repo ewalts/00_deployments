@@ -1,0 +1,13 @@
+###> This is the second file. 
+###> Does not recreate nginx, only modifies it.
+
+---
+services:
+  web:
+    image: ubuntu/apache2
+    container_name: smm_apache2
+    ports:
+      - "80:80"
+    volumes:
+      - ./www/html/:/var/www/html/
+

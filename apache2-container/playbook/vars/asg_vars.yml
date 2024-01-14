@@ -1,0 +1,54 @@
+###>  Vars generated from generate_vars_from_play.php from rewbin.org Richard Walts, Inc.
+###>   AWS - Create EC2 Instance
+
+inst_name: exa-w2-web-01
+play_home: /home/new_user/wrk/cloud/aws/ansible/exa-ubuntu-asg
+create_vpc: false
+asg_name: 00-apache-exa-asg
+ami_name: 00-exa-ubu-22
+tags_name: 00-apache-exa
+s3_repo: 's3://ew-exa'
+iam_role: 00-apache-exa-EC2-Role
+instance_profile: 00-apache-exa-EC2Profile
+policy_name: 00-apache-exa-EC2Policy
+vpc_id: vpc-031717-----------
+cidr_block: '10.1.0.0/16'
+ncom_net_cidr: '10.1.247.0/28'
+svc_net_cidr: '10.1.2.0/24'
+my_user: new_user
+my_group: new_user
+code_commit: my_cc_repo
+ins_type: t2.micro
+key_name: sc-exa
+ncom_net_sg: 00-apache-exa-ncoms
+sg: 00-apache-exa-ncoms
+sg_tag_name: 00-apache-exa-ncoms
+new_env: south-main
+key_file: /home/new_user/wrk/cloud/.secure/sc-exa/sc-exa.pem
+my_ssh_key_path: /home/new_user/wrk/cloud/.secure/sc-exa/sc-exa.pem
+dns_zone: rewbin.org
+host_record: 01-exa.rewbin.org
+my_elb: 00-apache-exa-lb01
+exa_asg_lt: 00-exa-launch-template
+exa_asg: 00-south-main-asg
+region: us-west-2
+az: us-west-2c
+#################################
+my_ip: 300.300.300.4/32
+deployment_log: ~/.ansible/output/deployment_register_vars.yml
+ ###> my_elb: exa-service-lb
+ ###> sg_id:                      #  registerd var or not   - "{{ sec_group_info['security_groups'][0]['group_id'] }}"
+ ###> subnet_id:                  #  registered var or not- "{{ lookup ('file', '/tmp/asg_subnet_id') }}"
+subnet_tag_name: 00-apache-exa-subnet                             #  registered var instance_id: "{{ lookup ('file', '/tmp/asg_instance_id') }}"
+#ami_name: 00-exa-ubu-22      #  name: "{{ ami_name }}"
+ncom_tag_name: 00-apache-exa          #  Name: "{{ tags_name }}"
+tags_service: 01-K8s-w2       #  
+asg_lt: 00-apache-exa-cl-lt      #  asg launch template name
+asg_name: 00-apache-exa-cl
+                            #  registered var asg ami image_id: "{{ ami['image_id'] }}"
+ ###> new_vpc_name: 01-Kube-ASG-VPC ### >> The lack of AZ specific VPC and instance needs and availability in a specific zone, creating VPCs on the fly can be problematic. Subnetting existing cidr_blocks of existing VPCs is usually not an issue.
+ ###> new_vpc_app: exa  ###>  If your using large instances or multi-az anyway don't care which zone. 
+ ###> new_vpc_purpose: exa_cluster 
+
+my_timezone: 'Pacific/Honolulu'
+s3_bucket: ew-exa

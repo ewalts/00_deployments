@@ -1,0 +1,6 @@
+---
+src_dir: /apache2-container/apache
+apache_dir: /var/docker/web/apache
+php_dir: /var/docker/web/php
+www_dir: /var/docker/web/apache/www/html
+mysql_dir: /var/docker/mysql
