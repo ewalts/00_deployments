@@ -1,0 +1,82 @@
+- name: MySQL Installation
+  hosts: ec2hosts
+  gather_facts: false
+  vars_files:
+    - vars/install_mysql_vars.yml
+    - vars/asg_vars.yml
+    - vars/aws_template_vars.yml
+  tasks:
+
+    - name: Wait install mysql
+      become: true
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Stop the MySQL Service
+      become: true
+      shell:
+        systemctl stop mysql
+
+    - name: Modify mysqld.cnf Define the MySQL bind address External Connections
+      become: true
+      lineinfile:
+        state: present
+        create: true
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address            = 0.0.0.0'
+
+    - name: Modify mysqld.cnf defining the MySQL bind address to allow external connections
+      become: true
+      lineinfile:
+        state: present
+        create: true
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: 'mysqlx-bind-address'
+        line: 'mysqlx-bind-address       = 0.0.0.0'
+
+    - name: Modify mysqld.cnf defining the new MySQL data directory
+      become: true
+      lineinfile:
+        state: present
+        create: true
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: "# datadir       = /var/lib/mysql"
+        line: datadir      = /data0/mysql
+
+    - name: Define SSL for encryption intransit
+      become: true
+      blockinfile:
+        state: present
+        create: true
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        #insertafter: "[mysqld]"
+        insertbefore: "Basic Settings"
+        block: |
+          ssl_ca=ca.pem
+          ssl_cert=server-cert.pem
+          ssl_key=server-key.pem
+          require_secure_transport=ON
+
+    - name: Update the apparmor policy
+      become: true
+      blockinfile:
+        state: present
+        create: true
+        path: /etc/apparmor.d/usr.sbin.mysqld
+        insertbefore: /var/lib/mysql/ r,
+        block: |
+          /data0/mysql/ r,
+          /data0/mysql/** rwx,
+
+    - name: Set filesystem permissions and migrade system database
+      become: true
+      shell: |
+        chown mysql:mysql /data0/mysql
+        rsync -av /var/lib/mysql/ /data0/mysql/
+
+    - name: Restart mysql.service
+      become: true
+      shell: |
+        systemctl start mysql.service

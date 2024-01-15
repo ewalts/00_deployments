@@ -1,0 +1,11 @@
+###>  Vars generated from generate_vars_from_play.php from rewbin.org Richard Walts, Inc.
+###>   Initial server setup tasks
+
+ssh_group: remote_admin
+ufw_ports:
+  - 22
+  - 3306 
+item_id: i-0----------------------
+my_timezone: 'Pacific/Honolulu'
+password: { echo notusedpassword | password_hash('sha512', password_salt) }
+copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"

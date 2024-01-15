@@ -1,0 +1,68 @@
+- name: Create x509 certs for new instances
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/new_deployment_vars.yml
+    
+  tasks:
+    - name: Insure openssl is installed
+      become: true
+      apt:
+        name: openssl
+        state: present
+
+    - name: Check for directory
+      stat:
+        path: "{{ cert_path }}"
+      register: is_dir
+    - debug:
+        msg: "{{ is_dir.stat.exists }}"
+
+    - name: Create location for certs
+      when: "{{ is_dir.stat.exists }} == False"
+      shell: |
+        mkdir "{{ cert_path }}" 
+
+##
+##  CA certificate
+
+    - name: Generate key for CA ca-key.pem
+      shell: |
+        openssl genrsa 2048 > "{{ cert_path }}"/ca-key.pem
+
+    - name: Create CA certificate with ca key ca.pem
+      shell: |
+        openssl req -new -x509 -nodes -days 3600 -key "{{ cert_path }}"/ca-key.pem -out "{{ cert_path }}"/ca.pem -subj "{{ subj_ca_key }}"
+
+##
+##  Node certs
+##    Simple two node client -> server auth
+
+##  For more than two nodes just loop this section. 
+## -- loop
+    - name: Create server- request
+      shell: |
+        openssl req -newkey rsa:2048 -days 3600 -nodes -keyout "{{ cert_path }}"/server-key.pem -out "{{ cert_path }}"/server-req.pem -subj "{{ subj_srv_req }}"
+
+    - name: Create server-key
+      shell: |
+        openssl rsa -in "{{ cert_path }}"/server-key.pem -out "{{ cert_path }}"/server-key.pem
+
+    - name: create server 509 cert
+      shell: |
+        openssl x509 -req -in "{{ cert_path }}"/server-req.pem -days 3600 -CA "{{ cert_path }}"/ca.pem -CAkey "{{ cert_path }}"/ca-key.pem -set_serial 01 -out "{{ cert_path }}"/server-cert.pem 
+## -- end loop
+
+
+    - name: Create client request
+      shell: |
+        openssl req -newkey rsa:2048 -days 3600  -nodes -keyout "{{ cert_path }}"/client-key.pem -out "{{ cert_path }}"/client-req.pem -subj "{{ subj_cl_req }}"
+
+    - name: Create client key 
+      shell: |
+        openssl rsa -in "{{ cert_path }}"/client-key.pem -out "{{ cert_path }}"/client-key.pem
+
+    - name: create client 509 cert
+      shell: |
+        openssl x509 -req -in "{{ cert_path }}"/client-req.pem -days 3600 -CA "{{ cert_path }}"/ca.pem -CAkey "{{ cert_path }}"/ca-key.pem -set_serial 01 -out "{{ cert_path }}"/client-cert.pem 
+

@@ -1,0 +1,6 @@
+###>  Vars generated from generate_vars_from_play.php from rewbin.org Richard Walts, Inc.
+ ###> Task -name: Check for directory
+
+cert_path: /etc/ssl/mysql         ###> Play parameter [path: "]
+subj_constant: "/C=US/ST=Hawaii/L=Honolulu/O=RWI/OU=IT Department/CN="
+ca_cn: ca1.mydomain.org

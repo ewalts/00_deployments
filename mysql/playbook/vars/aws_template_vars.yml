@@ -1,0 +1,10 @@
+---
+aws_ubu_22: ami-0efcece6bed30fd98 
+aws_ubu_20: ami-08e2c1a8d17c2fe17
+aws_amz_2023: ami-093467ec28ae4fe03
+aws_amz_2: ami-0c0d141edc4f470cc
+
+###> 
+amz-2023-10g: ami-0ad458d97ac0b5bfc
+ubu_22_10g: ami-0c5dff571d748230f
+RHEL_80_10g: ami-09bc618489fd6730f

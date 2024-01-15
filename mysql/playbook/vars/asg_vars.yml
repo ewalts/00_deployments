@@ -1,0 +1,51 @@
+###>  Vars generated from generate_vars_from_play.php from rewbin.org Richard Walts, Inc.
+###>   AWS - Create EC2 Instance
+create_vpc: false
+asg_name: 02-mysql-w2-asg
+ami_name: 02-mysql-ubu-22
+tags_name: 02-mysql-w2
+s3_repo: 's3://ew-exa'
+iam_role: 02-mysql-w2-EC2-Role
+instance_profile: 02-mysql-w2-EC2Profile
+policy_name: 02-mysql-w2-EC2Policy
+vpc_id: vpc-0317179a----------
+cidr_block: '10.1.0.0/16'
+ncom_net_cidr: '10.1.235.0/28'
+my_user: new_user
+my_group: new_user
+item: mysql-w2-01 
+ins_type: t2.micro
+key_name: sc-exa
+ncom_net_sg: 02-mysql-w2-ncoms
+sg: 02-mysql-w2-ncoms
+sg_tag_name: 02-mysql-w2-ncoms
+new_env: exa-w2
+product_tag: mysqldb
+key_file: /home/new_user/wrk/cloud/.secure/sc-exa/sc-exa.pem
+my_ssh_key_path: /home/new_user/wrk/cloud/.secure/sc-exa/sc-exa.pem
+dns_zone: rewbin.org
+host_record: 02-mysql.rewbin.org
+#my_elb: 02-mysql-w2-lb01
+exa_asg_lt: 02-mysql-launch-template
+exa_asg: 00-exa-w2-asg
+region: us-west-2
+az: us-west-2c
+#################################
+my_ip: 300.300.300.4/32
+deployment_log: ~/.ansible/output/mysql_deployment_register_vars.yml
+ ###> my_elb: exa-service-lb
+ ###> sg_id:                      #  registerd var or not   - "{{ sec_group_info['security_groups'][0]['group_id'] }}"
+ ###> subnet_id:                  #  registered var or not- "{{ lookup ('file', '/tmp/asg_subnet_id') }}"
+subnet_tag_name: 02-mysql-w2-subnet                             #  registered var instance_id: "{{ lookup ('file', '/tmp/asg_instance_id') }}"
+ami_name: 02-mysql-ubu-22      #  name: "{{ ami_name }}"
+ncom_tag_name: 02-mysql-w2          #  Name: "{{ tags_name }}"
+tags_service: 01-exa-w2       #  
+asg_lt: 02-mysql-w2-cl-lt      #  asg launch template name
+asg_name: 02-mysql-w2-cl
+                            #  registered var asg ami image_id: "{{ ami['image_id'] }}"
+ ###> new_vpc_name: 01-Kube-ASG-VPC ### >> The lack of AZ specific VPC and instance needs and availability in a specific zone, creating VPCs on the fly can be problematic. Subnetting existing cidr_blocks of existing VPCs is usually not an issue.
+ ###> new_vpc_app: exa  ###>  If your using large instances or multi-az anyway don't care which zone. 
+ ###> new_vpc_purpose: exa_cluster 
+
+my_timezone: 'Pacific/Honolulu'
+s3_bucket: ew-exa
