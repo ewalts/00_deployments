@@ -4,10 +4,11 @@
 ---
 services:
   web:
-    image: ubuntu/apache2
+    image: 00-----657660.dkr.ecr.us-west-2.amazonaws.com/apache2_php8.2
     container_name: smm_apache2
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./www/html/:/var/www/html/
 
