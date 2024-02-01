@@ -1,0 +1,24 @@
+- name: Checking for aws-cli
+  hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Pull aws-cli version
+    shell: |
+      aws --version
+    register: aws_version
+
+  - debug:
+      msg: "{{ aws_version.stdout.find('aws-cli') }}"
+
+  - debug:
+      msg: "{{ aws_version.stdout.find('aws-cki') }}"
+
+  - name: Create test file
+    file:
+      path: ~/my_recent_aws_cli_test.txt
+      state: touch
+    when:  aws_version.stdout.find('aws-cli') == 0
+    register: out
+  - debug:
+      msg: "{{out}}"
+

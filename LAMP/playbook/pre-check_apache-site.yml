@@ -1,0 +1,30 @@
+---
+
+- name: AWS - Create EC2 Instance
+  vars_files:
+    - vars/deployment_vars.yml
+    - vars/aws_template_vars.yml
+    - "{{ deployment_log }}"
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Check Apache instance
+      amazon.aws.ec2_instance_info:
+        instance_ids: 
+          - "{{ apache_instance_id }}"
+      register: apache_ec2
+    - debug:
+        msg: "{{ apache_ec2 }}"
+
+    - name: Check MySQL instance
+      amazon.aws.ec2_instance_info:
+        instance_ids: 
+          - "{{ mysql_instance_id }}"
+      register: mysql_ec2
+    - debug:
+        msg:  "{{ mysql_ec2 }}"
+
+    - debug:
+        msg: "Found it this time"
+      when: mysql_ec2.instances.0.block_device_mappings.1.device_name == '/dev/xvdd'
+

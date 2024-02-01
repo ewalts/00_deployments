@@ -1,0 +1,30 @@
+    ###> Check MySQL Server Availability Locally
+    - name: MySQL server is active
+      service:
+        name: mysql
+        state: started
+      register: mysql_details
+      until: mysql_details.status.ActiveState == "active"
+      retries: 10
+      delay: 10 
+
+    ###> Check for database tables >> database exists already
+    - name: Count tables in "{{ db_name }}"
+      become: true
+      shell: |
+        echo "select count(*) from table_handles where OBJECT_SCHEMA='{{ db_name }}';" | mysql performance_schema
+      ignore_errors: true
+      register: table_count
+    - debug:
+        msg: "{{ table_count.stdout_lines[1] }}" 
+
+    ###> Check data directory
+    - name: Check disk          
+      become: true
+      stat:
+        path: "{{ mysql_data_dir }}"
+      register: db_dir
+    - debug:
+        msg: "{{ db_dir.stat.exists }}"
+
+ 

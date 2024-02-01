@@ -1,0 +1,195 @@
+---
+
+- name: LAMP Site Deployment - South Main Memorial
+  vars_files:
+    - vars/deployment_vars.yml
+    - vars/aws_template_vars.yml
+  hosts: localhost
+  gather_facts: false
+  tasks:
+
+    - name: Require Subnet
+      import_tasks:
+        file: tasks/create_subnet.yml
+
+    - name: Require Security Group
+      import_tasks:
+        file: tasks/aws_security_group.yml
+
+    - name: Check role info
+      community.aws.iam_role:
+        name: "{{ iam_role }}"
+      register: role_result
+      ignore_errors: true
+
+    - name: Create IAM assume Role
+      community.aws.iam_role:
+        name: "{{ iam_role }}"
+        assume_role_policy_document: "{{ lookup('file','../scripts/assume_iam_role.json') }}"
+        description: Role for EC2 Instances
+        state: present
+        tags:
+          environment: "{{ new_env }}"
+      register: iam_role_info
+    - debug:
+        msg: "{{ iam_role_info }}"
+
+    - name: Shell timestamp for unique profile name
+      shell: |
+        echo $(date '+%Y%m%d-%H%M%s')
+      register: time_stamp
+
+    - name: Apache Instance Profile - Create
+      ansible.builtin.command: aws iam create-instance-profile
+        --instance-profile-name "{{ apache_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+
+    - name: MySQL Instance Profile - Create
+      ansible.builtin.command: aws iam create-instance-profile
+        --instance-profile-name "{{ mysql_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: Create Policy
+      amazon.aws.iam_policy:
+        iam_type: role
+        iam_name: "{{ iam_role }}"
+        policy_name: "{{ policy_name }}"
+        policy_json: "{{ lookup('file','../scripts/00-apache2-php8.2.json') }}"
+        state: present
+      register: iam_policy_info
+    - debug:
+        msg: "{{ iam_policy_info }}"
+
+    - name: Attach Role to Apache Instance Profile
+      ansible.builtin.command: aws iam add-role-to-instance-profile
+        --role-name "{{ iam_role }}"
+        --instance-profile-name "{{ apache_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: New Apache Instance
+      amazon.aws.ec2_instance:
+        name: "{{ apache_inst_name }}"
+        key_name: "{{ key_name }}"
+        iam_instance_profile: "{{ apache_instance_profile }}-{{ time_stamp.stdout }}"
+        vpc_subnet_id: "{{ subnet_info['subnet']['id'] }}"
+        instance_type: "{{ web_ins_type }}"
+        security_groups: 
+          - "{{ sg }}"
+        network:
+          assign_public_ip: true
+        image_id: "{{ ubu_22_10g }}"
+        tags:
+          Name: "{{ web_tags_name }}"
+          environment: "{{ new_env }}"
+          product: "{{ product_tag }}"
+          purpose: web-host
+      register: ec2
+    - debug:
+        msg: "{{ ec2 }}"
+
+    - name: Register apache host to ec2hosts and apache
+      add_host: 
+        hostname: "{{ ec2['instances'][0]['network_interfaces'][0]['association']['public_ip'] }}" 
+        groups: 
+          - ec2hosts
+          - apache
+
+    - name: Create DNS A record for web
+      amazon.aws.route53:
+        state: present
+        overwrite: true
+        zone: "{{ dns_zone }}"
+        record: "{{ web_host_fqdn }}"
+        type: A
+        ttl: 7200
+        value: "{{ ec2['instances'][0]['network_interfaces'][0]['association']['public_ip'] }}"
+      ignore_errors: true
+      register: dns_web
+    - debug:
+        msg: "{{ dns_web }}"
+
+    - name: Attach Role to MySQL Instance Profile
+      ansible.builtin.command: aws iam add-role-to-instance-profile
+        --role-name "{{ iam_role }}"
+        --instance-profile-name "{{ mysql_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: New MySQL Instance
+      amazon.aws.ec2_instance:
+        name: "{{ mysql_inst_name }}"
+        key_name: "{{ key_name }}"
+        iam_instance_profile: "{{ mysql_instance_profile }}-{{ time_stamp.stdout }}"
+        vpc_subnet_id: "{{ subnet_info['subnet']['id'] }}"
+        instance_type: "{{ db_ins_type }}"
+        security_groups:
+          - "{{ db_sg }}"
+        network:
+          assign_public_ip: true
+        image_id: "{{ ubu_22_10g }}"
+        tags:
+          Name: "{{ db_tags_name}}"
+          environment: "{{ new_env }}"
+          product: "{{ product_tag }}"
+          purpose: db-host
+        state: running
+        wait: true
+      register: ec2_db
+    - debug:
+        msg: "{{ ec2_db }}"
+
+    - name: Register MysQL host to groups ec2hosts and mysql
+      add_host: 
+        hostname: "{{ ec2_db['instances'][0]['network_interfaces'][0]['association']['public_ip'] }}" 
+        groups:
+          - ec2hosts 
+          - mysql
+      register: groups
+    - debug:
+        msg: "{{ groups }}"
+
+    - name: Create DNS A record
+      amazon.aws.route53:
+        state: present
+        overwrite: true
+        zone: "{{ dns_zone }}"
+        record: "{{ db_host_fqdn }}"
+        type: A
+        ttl: 7200
+        value: "{{ ec2_db['instances'][0]['network_interfaces'][0]['association']['public_ip'] }}"
+      ignore_errors: true
+      register: dns_db
+    - debug:
+        msg: "{{ dns_db }}"
+
+    - name: Deployment Vars Log task
+      import_tasks:
+        file: tasks/record_deployment_vars.yml 
+
+    - name: Update inventory yaml file inventory/inventory.yml
+      shell: |
+        /full-path-to/scripts/update_inventory.php "{{ groups }}" ####  UPDATE this
+      ignore_errors: true
+
+- name: Basic ubuntu server setup
+  ansible.builtin.import_playbook: ubuntu_server_setup.yml
+
+- name: MySQL firewall setup           
+  ansible.builtin.import_playbook: mysql_ufw.yml
+
+- name: Add MySQL data volume
+  ansible.builtin.import_playbook: add_volume.yml
+
+- name: Apache firewall setup
+  ansible.builtin.import_playbook: apache_ufw.yml
+
+- name: MySQL setup 
+  ansible.builtin.import_playbook: install_mysql.yml
+#  when: mysql_data_dir.stdout != /data0/mysql
+
+- name: Apache container setup
+  ansible.builtin.import_playbook: apache2_compose.yml
+#  when: apache_success == False
+
+
+

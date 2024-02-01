@@ -1,0 +1,72 @@
+###>  IAM Tasks role, policy, instance profiles
+
+    - name: Check role info
+      community.aws.iam_role:
+        name: "{{ iam_role }}"
+      register: role_result
+      ignore_errors: true
+
+    - name: Create IAM assume Role
+      community.aws.iam_role:
+        name: "{{ iam_role }}"
+        assume_role_policy_document: "{{ lookup('file','../scripts/assume_iam_role.json') }}"
+        description: Role for EC2 Instances
+        state: present
+        tags:
+          environment: "{{ new_env }}"
+      register: iam_role_info
+    - debug:
+        msg: "{{ iam_role_info }}"
+
+    - name: Shell timestamp for unique profile name
+      shell: |
+        echo $(date '+%Y%m%d-%H%M%s')
+      register: time_stamp
+
+    - name: Apache Instance Profile - Create
+      ansible.builtin.command: aws iam create-instance-profile
+        --instance-profile-name "{{ apache_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: MySQL Instance Profile - Create
+      ansible.builtin.command: aws iam create-instance-profile
+        --instance-profile-name "{{ mysql_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: Create Policy
+      amazon.aws.iam_policy:
+        iam_type: role
+        iam_name: "{{ iam_role }}"
+        policy_name: "{{ policy_name }}"
+        policy_json: "{{ lookup('file','../scripts/00-apache2-php8.2.json') }}"
+        state: present
+      register: iam_policy_info
+    - debug:
+        msg: "{{ iam_policy_info }}"
+
+    - name: Attach Role to Apache Instance Profile
+      ansible.builtin.command: aws iam add-role-to-instance-profile
+        --role-name "{{ iam_role }}"
+        --instance-profile-name "{{ apache_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: Attach Role to MySQL Instance Profile
+      ansible.builtin.command: aws iam add-role-to-instance-profile
+        --role-name "{{ iam_role }}"
+        --instance-profile-name "{{ mysql_instance_profile }}-{{ time_stamp.stdout }}"
+      ignore_errors: true
+
+    - name: Deployment Record Update AWS IAM Tasks
+      lineinfile:
+        state: present
+        create: true     
+        path: "{{ deployment_log }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: 'iam_role_id:', line: "iam_role_id: {{ iam_role_info['role_id'] }}" }
+        - { regexp: 'iam_role:', line: "iam_role: {{ iam_role }}" }
+        - { regexp: 'iam_policy:', line: "iam_policy: {{ iam_policy_info['policy_names'][0] }}" }
+        - { regexp: 'apache_instance_profile:', line: "apache_instance_profile: {{ apache_instance_profile }}-{{ time_stamp.stdout }}" }
+        - { regexp: 'mysql_instance_profile:', line: "mysql_instance_profile: {{ mysql_instance_profile }}-{{ time_stamp.stdout }}" }
+

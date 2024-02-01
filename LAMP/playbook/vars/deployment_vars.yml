@@ -1,0 +1,89 @@
+###>  Vars generated from generate_vars_from_play.php from rewbin.org Richard Walts, Inc.
+###>   AWS - Create EC2 Instance
+###> South Main Memorial,
+###> Deployment details
+region: DEP_REGION
+az: DEP_AZ
+
+iam_role: 00-smm-site-EC2-Role
+policy_name: 00-smm-site-EC2Policy
+apache_instance_profile: 00-smm-apache-EC2Profile
+mysql_instance_profile: 00-smm-mysql-EC2Profile
+ncom_net_sg: 00-smm-ncoms
+sg: 00-smm-site-ncoms
+db_sg: 00-smm-db-ncoms
+
+###> Tags
+db_tags_name: 00-smm-site-db
+web_tags_name: 00-smm-site-web
+sg_tag_name: 00-smm-site-ncoms
+db_sg_tag_name: 00-smm-db-ncoms
+new_env: NEW_ENV
+purpose: web
+product_tag: smm-web
+
+###> Networking
+create_vpc: false 
+vpc_id: VPC_ID
+net_role: smm-web
+subnet_tag_name: 00-smm-site-subnet      #  registered var instance_id: "{{ lookup ('file', '/tmp/asg_instance_id') }}"
+ami_name: 01-smm-ubu-22      #  name: "{{ ami_name }}"
+ncom_tag_name: 00-smm-site          #  Name: "{{ tags_name }}"
+tags_service: 01-smm-web-w2       #  
+cidr_block: IP_BLOCK
+ncom_net_cidr: NCOM_SUBNET
+container_cidr_1: '172.17.0.0/16'
+container_cidr_2: '172.18.0.0/16'
+
+###> EC2 Infrastructure
+apache_inst_name: smm-web-w2-01
+mysql_inst_name: smm-mysql-w2-01
+web_ins_type: t2.micro
+db_ins_type: t2.medium
+
+
+dns_zone: DEP_DOMAIN
+web_host_fqdn: WEBHOST_FQDN
+db_host_fqdn: DBHOST_FQDN
+
+#my_elb: 00-smm-site-lb01
+#smm_asg_lt: 00-smm-launch-template
+#smm_asg: 00-south-main-asg
+#################################
+###> Private vars
+# dns_zone: example.org
+# web_host_fqdn: webhost.example.org
+# db_host_fqdn: dbhost.example.org
+
+# my_user: mcguy
+# my_group: mcgroup
+# my_ip: 223.223.223.223/32
+# deployment_log: ~/dep-1/apache-site/output/deployment_register_vars.yml
+# key_file: ~/.securepath/project/somecert.pem
+# my_ssh_key_path: ~/.securepath/project/somecert.pem
+#################################
+db_file: MYSQL_DB_FILE
+db_name: MYSQL_DB_NAME
+db_user: MYSQL_USER
+db_pass: MYSQL_PASSs
+
+my_user: 
+my_group: 
+my_ip: 
+
+deployment_log: DEP_DIR/output/deployment_register_vars.yml
+key_file: DEP_DIR/certs/key.pem
+my_ssh_key_path: DEP_DIR/certs/key.pem
+key_name: DEP_KEY
+#my_timezone: 
+s3_bucket: DEP_BUCKET
+
+
+###>  ASG Info <<<<<<<<<<<< 
+# asg_elb: 00-smm-site-lb01
+# asg_lt: 00-smm-site-cl-lt      #  asg launch template name
+# asg_name: 00-smm-site-cl
+# asg_name: 00-smm-site-asg
+# ami_name: 01-smm-ubu-22
+# s3_repo:   ###>
+

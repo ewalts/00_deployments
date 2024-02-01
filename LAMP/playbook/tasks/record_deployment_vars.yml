@@ -1,0 +1,26 @@
+    - name: Deployment Record Update - Full Deployment Details 
+      lineinfile:
+        state: present
+        create: true
+        path: "{{ deployment_log }}"
+        regexp: "{{ item.regexp }}" 
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: 'vpc_id:', line: "vpc_id: {{ vpc_id }}" }
+        - { regexp: 'subnet_id:', line: "subnet_id: {{ subnet_info['subnet']['id'] }}" }
+        - { regexp: 'web_sg_id:', line: "web_sg_id: {{ sg_info['group_id'] }}" }
+        - { regexp: 'db_sg_id:', line: "db_sg_id: {{ db_sg_info['group_id'] }}" }
+        - { regexp: 'iam_role_id:', line: "iam_role_id: {{ iam_role_info['role_id'] }}" }
+        - { regexp: 'iam_role:', line: "iam_role: {{ iam_role }}" }
+        - { regexp: 'iam_policy:', line: "iam_policy: {{ iam_policy_info['policy_names'][0] }}" }
+        - { regexp: 'apache_instance_profile:', line: "apache_instance_profile: {{ apache_instance_profile }}-{{ time_stamp.stdout }}" }
+        - { regexp: 'apache_instance_id:', line: "apache_instance_id: {{ ec2['instance_ids'][0] }}" }
+        - { regexp: 'web_priv_ip:', line: "web_priv_ip: {{ ec2['instances'][0]['network_interfaces'][0]['private_ip_address'] }}" }
+        - { regexp: 'webhost_dns_record:', line: "webhost_dns_record: {{ dns_web['diff']['resource_record_sets'][0]['resource_records'][0]['value'] }} A {{ dns_web['diff']['resource_record_sets'][0]['name'] }}" }
+        - { regexp: 'mysql_instance_profile:', line: "mysql_instance_profile: {{ mysql_instance_profile }}-{{ time_stamp.stdout }}" }
+        - { regexp: 'mysql_instance_id:', line: "mysql_instance_id: {{ ec2_db['instance_ids'][0] }}" }
+        - { regexp: 'mysql_priv_ip:', line: "mysql_priv_ip: {{ ec2_db['instances'][0]['network_interfaces'][0]['private_ip_address'] }}" }
+        - { regexp: 'dbhost_dns_record:', line: "dbhost_dns_record: {{ dns_db['diff']['resource_record_sets'][0]['resource_records'][0]['value'] }} A {{ dns_db['diff']['resource_record_sets'][0]['name'] }}" }
+      ignore_errors: true
+###> Edits :%s/\n        line:/, line:/g
+###> Edits :%s/        regexp: /        - { regexp: /g

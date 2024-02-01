@@ -1,0 +1,7 @@
+---
+src_dir: ~/dep-1/apache-site/apache
+apache_dir: /var/docker/web/apache
+apache_create_dir: /var/docker/web/apache_init
+php_dir: /var/docker/web/php
+www_dir: /var/docker/web/apache/www/html
+mysql_dir: /var/docker/mysql

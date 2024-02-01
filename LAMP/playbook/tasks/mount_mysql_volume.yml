@@ -1,0 +1,59 @@
+    - name: Wait for SSH
+      ansible.builtin.wait_for:
+        port: 22
+        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+        search_regex: OpenSSH
+        delay: 10
+      connection: local
+
+    - name: create partition
+      become: true
+      parted:
+        device: /dev/xvdd
+        number: 1
+        flags: [ lvm ]
+        state: present
+
+    - name: Create volume group
+      become: true
+      community.general.lvg:
+        vg: mysql.data
+        pvs: /dev/xvdd1
+        pvresize: true
+        state: active
+
+    - name: Create volume
+      become: true
+      community.general.lvol:
+        vg: mysql.data
+        lv: lv01
+        size: +100%FREE
+      register: lv
+    - debug:
+        msg: "{{ lv }}"
+
+
+    - name: Test write to data dir
+      become: true
+      shell: |
+        ls /data0 
+      register: out
+    - debug:
+        msg: "{{ out }}"
+
+    - name: Create mount point
+      exists:
+        path: "{{ data_dir }}"
+    - name: Mount the volume
+      become: true
+      shell: |
+        mkfs.xfs /dev/mysql.data/lv01
+        mkdir /data0
+        mount /dev/mysql.data/lv01 /data0
+        echo "/dev/mysql.data/lv01  /data0  xfs  auto  0 0" >> /etc/fstab
+        mkdir /data0/mysql
+        chown mysql:mysql /data0/mysql
+        chmod 0700 /data0/mysql
+#      when: out.stdout == 'file not found'
+
+#

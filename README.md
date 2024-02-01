@@ -10,9 +10,11 @@ Most of these leverage AWS for infrastructure.  The OS configuration scripts, wi
 - In production I like to completely remove, or at least separate, the unused variables and comment them out.     
 - One of my earlier variable management script tools, would comment all the current values while defining the new values.  You may see some vars_files like these.
 
-Check out my ansible repository for more goodies and on-off plays.
+Check out my ansible repository for more goodies and one-off plays.
 
-In some cases, I like to wrap scripts around deployments.  I find it provides agile flexibility.  If you see any that look like the vars_files are variables themselves, there is likely a script that executes the playbook, or generates a deployment from those files as templates.  If you don't see the script, feel free to message me. Or if you would like me to assist with the creation of your own deployment.  I'm happy to help out when I'm not too busy.
+In some cases, I like to wrap scripts around deployments.  It provides more agility and guidance while generating certain aspects of a deplyment. 
+Passwords, secrets, cert locations, any piece I might alter frequently between deployments.  
+If you do this with your own deployments, it is important to securely document such provided or generated values.  If see any where vars_files values are variables themselves, there is likely a script that executes the playbook, or generates a deployment from those files as templates.  If you don't see the script, feel free to message me. Or if you would like me to assist with the creation of your own deployment.  I'm happy to help out when I'm not too busy.
 
 Aloha
 

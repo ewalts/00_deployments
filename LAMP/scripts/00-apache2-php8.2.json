@@ -1,0 +1,42 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "apache2php82",
+            "Action": [
+                "ecr:ListImages",
+                "ecr:PutImage",
+                "ecr:UploadLayerPart",
+                "ecr:PutLifecyclePolicy",
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:DescribeRepositories",
+                "ecr:GetAuthorizationToken",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetLifecyclePolicy",
+                "ecr:BatchCheckLayerAvailability"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:ecr:"
+            ]
+        },
+        {
+            "Sid": "apache2php822",
+            "Action": [
+                "ecr:BatchGetImage",
+                "ecr:ListImages",
+                "ecr:DescribeImages",
+                "ecr:DescribeRepositories",
+                "ecr:GetAuthorizationToken",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetRepositoryPolicy",
+                "ecr:BatchCheckLayerAvailability"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}

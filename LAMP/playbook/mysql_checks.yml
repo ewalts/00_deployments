@@ -1,0 +1,42 @@
+    ###> Check for database tables >> database exists already
+- name: Test output
+  hosts: pac1
+  gather_facts: false
+  vars:
+    - db_name: south-main
+    - mysql_data_dir: /data0
+  tasks:
+
+    - name: PyMysql is installed
+      become: true
+      apt:
+        name: python3-pymysql
+        state: present
+ 
+    - name: Count tables in "{{ db_name }}"
+      become: true
+      shell: |
+        echo "select count(*) from table_handles where OBJECT_SCHEMA='{{ db_name }}';" | mysql performance_schema
+      ignore_errors: true
+      register: table_count
+    - debug:
+        msg: "{{ table_count.stdout_lines[1] }}" 
+
+    - name: Check disk          
+      become: true
+      stat:
+        path: "{{ mysql_data_dir }}"
+      register: db_dir
+ 
+    - debug:
+        msg: "{{ db_dir.stat.exists }}"
+
+    - name: MySQL Availability
+      service:
+        name: mysql
+        state: started
+      register: mysql_details
+
+    - debug:
+        msg: "{{ mysql_details }}" 
+
