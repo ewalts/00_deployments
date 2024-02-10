@@ -65,7 +65,7 @@ db_host_fqdn: DBHOST_FQDN
 db_file: MYSQL_DB_FILE
 db_name: MYSQL_DB_NAME
 db_user: MYSQL_USER
-db_pass: MYSQL_PASSs
+db_pass: MYSQL_PASS
 
 my_user: 
 my_group: 
